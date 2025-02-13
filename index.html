@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Play - Jogo de Moedas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Tela de Início -->
+    <div id="start-screen" class="screen">
+        <h1>Infinite Play</h1>
+        <div class="instructions">
+            <h2>Como Jogar</h2>
+            <ul>
+                <li>Clique nas moedas para coletá-las</li>
+                <li>Cada moeda vale 1 ponto</li>
+                <li>Encontre a moeda especial para ativar o modo discoteca</li>
+                <li>No modo discoteca, você ganha pontos extras e +10 segundos</li>
+                <li>Você tem 50 segundos para fazer o máximo de pontos</li>
+            </ul>
+        </div>
+        <button id="start-button">Começar</button>
+    </div>
+
+    <!-- Tela do Jogo -->
+    <div id="game-screen" class="screen hidden">
+        <div class="cloud cloud-01"></div>
+        <div class="cloud cloud-02"></div>
+        <div class="cloud cloud-03"></div>
+        <div class="cloud cloud-04"></div>
+        <div class="cloud cloud-05"></div>
+        <div class="hud">
+            <div class="score">Pontos: <span id="score">0</span></div>
+            <div class="timer">Tempo: <span id="timer">50</span>s</div>
+        </div>
+        <div id="game-area"></div>
+    </div>
+
+    <!-- Tela de Fim de Jogo -->
+    <div id="end-screen" class="screen hidden">
+        <h2>Fim de Jogo!</h2>
+        <p>Sua pontuação: <span id="final-score">0</span></p>
+        <button id="restart-button">Jogar Novamente</button>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html> 

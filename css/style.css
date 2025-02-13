@@ -1,0 +1,523 @@
+/* Estilos Gerais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Chakra Petch', sans-serif;
+    background: #1a1a1a;
+    color: #E8F1F2;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Telas */
+.screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Tela de Início */
+#start-screen h1 {
+    font-size: 3.5em;
+    margin-bottom: 30px;
+    color: #00B4D8;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.instructions {
+    background: rgba(2, 62, 138, 0.85);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.instructions h2 {
+    color: #90E0EF;
+    margin-bottom: 15px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.instructions ul {
+    list-style-type: none;
+    text-align: left;
+}
+
+.instructions li {
+    margin: 10px 0;
+    padding-left: 20px;
+    position: relative;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+}
+
+.instructions li:before {
+    content: "•";
+    color: #90E0EF;
+    position: absolute;
+    left: 0;
+}
+
+/* Botões */
+button {
+    font-family: 'Chakra Petch', sans-serif;
+    background: #00B4D8;
+    color: #03045E;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(0, 180, 216, 0.5);
+    background: #90E0EF;
+}
+
+/* Área do Jogo */
+#game-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: url('../assets/imgs/Background_sky.jpg') no-repeat center center fixed;
+    background-size: cover;
+    z-index: 1;
+    overflow: hidden;
+}
+
+#game-area {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+.hud {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    font-size: 1.5em;
+    z-index: 9999;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+    background: rgba(2, 62, 138, 0.85);
+    border-radius: 10px;
+    margin: 0 20px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    color: #CAF0F8;
+}
+
+/* Moedas */
+.coin {
+    position: absolute;
+    width: var(--coin-size, 124px);
+    height: var(--coin-size, 124px);
+    cursor: pointer;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5));
+    opacity: 1;
+    z-index: 10;
+    pointer-events: auto;
+    will-change: transform, opacity;
+    transform-origin: center center;
+    transition: opacity 0.15s ease-out;
+}
+
+/* Variações de tamanho das moedas */
+.coin-small {
+    --coin-size: 80px;
+}
+
+.coin-large {
+    --coin-size: 150px;
+}
+
+/* Animações com velocidades diferentes */
+.coin-throw-left-fast {
+    animation: throwCoinLeft 1.5s forwards;
+}
+
+.coin-throw-right-fast {
+    animation: throwCoinRight 1.5s forwards;
+}
+
+.coin-throw-left-very-fast {
+    animation: throwCoinLeft 1s forwards;
+}
+
+.coin-throw-right-very-fast {
+    animation: throwCoinRight 1s forwards;
+}
+
+/* Animações originais mantidas para referência */
+.coin-throw-left {
+    animation: throwCoinLeft 2.5s forwards;
+}
+
+.coin-throw-right {
+    animation: throwCoinRight 2.5s forwards;
+}
+
+@keyframes throwCoinLeft {
+    0% {
+        transform: translateY(100vh) translateX(0) rotate(0deg);
+        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    40% {
+        transform: translateY(10vh) translateX(-100px) rotate(540deg);
+        animation-timing-function: cubic-bezier(0.8, 0, 0.8, 1);
+    }
+    100% {
+        transform: translateY(120vh) translateX(-200px) rotate(1080deg);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+}
+
+@keyframes throwCoinRight {
+    0% {
+        transform: translateY(100vh) translateX(0) rotate(0deg);
+        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    40% {
+        transform: translateY(10vh) translateX(100px) rotate(540deg);
+        animation-timing-function: cubic-bezier(0.8, 0, 0.8, 1);
+    }
+    100% {
+        transform: translateY(120vh) translateX(200px) rotate(1080deg);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+}
+
+.coin:hover {
+    filter: drop-shadow(0 0 15px #00B4D8) brightness(1.3);
+    z-index: 20;
+}
+
+.special-coin {
+    filter: drop-shadow(0 0 10px #90E0EF) brightness(1.2);
+    z-index: 15;
+}
+
+.special-coin:hover {
+    filter: drop-shadow(0 0 20px #90E0EF) brightness(1.4);
+}
+
+/* Removendo as animações de glow que estavam causando conflito */
+.coin::after,
+.coin:hover::after,
+.special-coin::after {
+    display: none;
+}
+
+/* Modo Discoteca */
+.disco-mode {
+    animation: disco-bg 2s infinite;
+}
+
+@keyframes disco-bg {
+    0% { background: #ff0000; }
+    25% { background: #00ff00; }
+    50% { background: #0000ff; }
+    75% { background: #ff00ff; }
+    100% { background: #ff0000; }
+}
+
+/* Tela de Fim de Jogo */
+#end-screen h2 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #00B4D8;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+#final-score {
+    font-size: 1.8em;
+    color: #90E0EF;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Camera Shake Animation */
+@keyframes cameraShake {
+    0%, 100% { 
+        transform: translate(0, 0) rotate(0deg); 
+    }
+    10% { 
+        transform: translate(-12px, -8px) rotate(-1deg); 
+    }
+    20% { 
+        transform: translate(12px, 8px) rotate(1deg); 
+    }
+    30% { 
+        transform: translate(-10px, -6px) rotate(-0.75deg); 
+    }
+    40% {
+        transform: translate(10px, 6px) rotate(0.75deg);
+    }
+    50% {
+        transform: translate(-8px, -4px) rotate(-0.5deg);
+    }
+    60% {
+        transform: translate(8px, 4px) rotate(0.5deg);
+    }
+    70% {
+        transform: translate(-6px, -3px) rotate(-0.25deg);
+    }
+    80% {
+        transform: translate(6px, 3px) rotate(0.25deg);
+    }
+    90% {
+        transform: translate(-4px, -2px) rotate(-0.125deg);
+    }
+}
+
+/* Aplicando shake em toda a página */
+body.camera-shake {
+    animation: cameraShake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    transform-origin: center center;
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Removendo shake individual do game-container */
+#game-container.camera-shake {
+    animation: none;
+}
+
+/* Explosão com Camera Shake */
+.explosion {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 1000;
+    will-change: transform, opacity;
+}
+
+@keyframes explode {
+    0% {
+        transform: scale(0.3);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Splash */
+.splash {
+    position: absolute;
+    pointer-events: none;
+    width: 80px;
+    height: 80px;
+    z-index: 999;
+}
+
+.splash-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #48CAE4;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00B4D8;
+}
+
+@keyframes splashParticle {
+    0% { 
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% { 
+        transform: translate(var(--tx), var(--ty)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Money Notes Effect */
+.money-note {
+    position: absolute;
+    width: 40px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    z-index: 1000;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    will-change: transform, opacity;
+    transform-origin: center center;
+}
+
+@keyframes moneyFly {
+    0% {
+        transform: translate(0, 0) rotate(0deg) scale(0.8);
+        opacity: 1;
+    }
+    10% {
+        opacity: 1;
+        transform: translate(calc(var(--tx) * 0.1), calc(var(--ty) * 0.1)) rotate(calc(var(--rotation) * 0.2)) scale(1);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.3)) rotate(calc(var(--rotation) * 0.5)) scale(1);
+    }
+    100% {
+        transform: translate(var(--tx), var(--ty)) rotate(var(--rotation)) scale(0.6);
+        opacity: 0;
+    }
+}
+
+.screen.hidden {
+    display: none !important;
+}
+
+/* Removendo classes e propriedades desnecessárias */
+.shake-container {
+    display: none;
+}
+
+/* Money effect optimization */
+.money-effect {
+    position: absolute;
+    color: #2ecc71;
+    font-size: 48px;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 1000;
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    will-change: transform, opacity;
+    text-shadow: 
+        0 0 10px rgba(46, 204, 113, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
+    font-family: 'Chakra Petch', sans-serif;
+    transform: scale(0.8);
+    opacity: 0;
+}
+
+@keyframes moneyScorePopup {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) translateY(-80px);
+        opacity: 0;
+    }
+}
+
+/* Cloud Styles */
+.cloud {
+    position: absolute;
+    background-repeat: no-repeat;
+    background-size: contain;
+    z-index: 2;
+    width: 250px;
+    height: 150px;
+    animation: moveCloud linear infinite;
+}
+
+.cloud-01 {
+    left: -250px;
+    top: 117px;
+    background-image: url('../assets/imgs/Cloud_01.png');
+    animation-duration: 30s;
+    width: 260px;
+    height: 155px;
+}
+
+.cloud-02 {
+    left: -250px;
+    top: 32px;
+    background-image: url('../assets/imgs/Cloud_02.png');
+    animation-duration: 35s;
+    animation-delay: -15s;
+    width: 240px;
+    height: 140px;
+}
+
+.cloud-03 {
+    left: -250px;
+    top: 473px;
+    background-image: url('../assets/imgs/Cloud_03.png');
+    animation-duration: 32s;
+    animation-delay: -22s;
+    width: 270px;
+    height: 160px;
+}
+
+.cloud-04 {
+    left: -250px;
+    top: 530px;
+    background-image: url('../assets/imgs/Cloud_04.png');
+    animation-duration: 38s;
+    animation-delay: -5s;
+    width: 245px;
+    height: 145px;
+}
+
+.cloud-05 {
+    left: -250px;
+    top: 465px;
+    background-image: url('../assets/imgs/Cloud_05.png');
+    animation-duration: 34s;
+    animation-delay: -28s;
+    width: 255px;
+    height: 150px;
+}
+
+@keyframes moveCloud {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(100vw + 500px));
+    }
+} 
