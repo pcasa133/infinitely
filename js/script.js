@@ -488,8 +488,10 @@ function createCoinInstance() {
                 coin.style.backgroundImage = `url(${bombImg.src})`;
             }
             
-            // Ajustar o intervalo para bombas (mais lento)
-            setTimeout(() => requestAnimationFrame(updateFrame), frameDuration * 2); // Dobro do tempo normal
+            // Ajustar o intervalo para bombas (mais suave)
+            if (coin.parentNode) {
+                setTimeout(() => requestAnimationFrame(updateFrame), frameDuration * 1.5);
+            }
         } else {
             const coinType = isSpecial ? 'special' : 'normal';
             const phaseCoins = coinImages[`phase${gameState.currentPhase}`][coinType];
@@ -505,10 +507,11 @@ function createCoinInstance() {
             if (coinImg && coinImg.src) {
                 coin.style.backgroundImage = `url(${coinImg.src})`;
             }
-        }
-        
-        if (coin.parentNode) {
-            setTimeout(() => requestAnimationFrame(updateFrame), frameDuration);
+            
+            // Atualização normal para moedas
+            if (coin.parentNode) {
+                setTimeout(() => requestAnimationFrame(updateFrame), frameDuration);
+            }
         }
     };
     
@@ -529,7 +532,7 @@ function createCoinInstance() {
                 }
             }, 300);
         }
-    }, isBomb ? 4000 : COIN_LIFETIME); // Bombas têm 4 segundos de vida, moedas continuam com 2.5 segundos
+    }, isBomb ? 5000 : COIN_LIFETIME); // Bombas têm 5 segundos de vida, moedas continuam com 2.5 segundos
 }
 
 // Funções de efeitos visuais

@@ -700,12 +700,12 @@ body.phase-1 .dragon {
 /* Classes de animação para bombas */
 .bomb.coin-throw-left-fast,
 .bomb.coin-throw-left-very-fast {
-    animation: throwBombLeft 3s forwards, bombGlow 1s infinite alternate !important;
+    animation: throwBombLeft 4s forwards, bombGlow 1s infinite alternate !important;
 }
 
 .bomb.coin-throw-right-fast,
 .bomb.coin-throw-right-very-fast {
-    animation: throwBombRight 3s forwards, bombGlow 1s infinite alternate !important;
+    animation: throwBombRight 4s forwards, bombGlow 1s infinite alternate !important;
 }
 
 /* Estilos para as bombas */
@@ -723,7 +723,7 @@ body.phase-1 .dragon {
     pointer-events: auto;
     will-change: transform, opacity;
     transform-origin: center center;
-    animation-duration: 3s !important;
+    animation-duration: 4s !important;
 }
 
 .bomb:hover {
