@@ -1,18 +1,23 @@
 # Infinite Play
 
-Um jogo divertido de coletar moedas e desviar de bombas, com duas fases diferentes e efeitos visuais incríveis!
+Um jogo divertido de coletar moedas desenvolvido com HTML, CSS e JavaScript puro.
 
 ## Como Jogar
 
-1. Clique nas moedas para coletá-las
-2. Cada moeda vale pontos diferentes:
-   - Fase 0 (Azul): 1 ponto por moeda normal
-   - Fase 1 (Vermelha): 2 pontos por moeda normal
-   - Moedas especiais: 2 pontos em qualquer fase
-   - Bombas: -3 pontos!
-3. Encontre a moeda especial para ativar o modo discoteca
-4. Colete a moeda de mudança de fase para avançar para a fase vermelha
-5. Cuidado com o dragão na fase vermelha!
+- Clique nas moedas para coletá-las
+- Cada moeda vale 1 ponto na fase azul e 2 pontos na fase vermelha
+- Encontre moedas especiais para ganhar pontos extras
+- Evite as bombas que fazem você perder pontos
+- Você tem 50 segundos para fazer o máximo de pontos possível
+
+## Recursos
+
+- Duas fases distintas com diferentes visuais e mecânicas
+- Moedas normais e especiais
+- Sistema de bombas
+- Efeitos visuais e sonoros
+- Dragões na fase vermelha
+- Sistema de pontuação progressivo
 
 ## Tecnologias Utilizadas
 
@@ -21,16 +26,34 @@ Um jogo divertido de coletar moedas e desviar de bombas, com duas fases diferent
 - JavaScript (ES6+)
 - Sprites e Assets Personalizados
 
+## Como Executar Localmente
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/seu-usuario/InfinitePlay.git
+```
+
+2. Abra o arquivo `index.html` em seu navegador
+
+## GitHub Pages
+
+O jogo está disponível online através do GitHub Pages em:
+https://seu-usuario.github.io/InfinitePlay/
+
 ## Estrutura do Projeto
 
 ```
-infinite-play/
-├── assets/         # Imagens e recursos
-├── css/            # Estilos
-├── js/             # Scripts
-└── index.html      # Página principal
+InfinitePlay/
+├── assets/         # Recursos do jogo (imagens, sprites)
+├── css/           # Arquivos de estilo
+├── js/            # Scripts do jogo
+└── index.html     # Página principal
 ```
 
-## Créditos
+## Contribuindo
 
-Desenvolvido como um projeto educacional para prática de animações web e manipulação do DOM. 
+Sinta-se à vontade para contribuir com o projeto. Abra uma issue ou envie um pull request.
+
+## Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes. 
