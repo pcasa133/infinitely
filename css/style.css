@@ -747,4 +747,44 @@ body.phase-1 .bomb {
     to {
         filter: drop-shadow(0 0 20px #FFD700) brightness(1.4);
     }
+}
+
+/* Loading Screen */
+#loading-screen {
+    background: #1a1a1a;
+    z-index: 9999;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.loading-content h2 {
+    color: #00B4D8;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.loading-bar {
+    width: 300px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin: 20px auto;
+    overflow: hidden;
+}
+
+.loading-progress {
+    width: 0%;
+    height: 100%;
+    background: #00B4D8;
+    border-radius: 10px;
+    transition: width 0.3s ease-out;
+}
+
+.loading-text {
+    color: #90E0EF;
+    font-size: 1.2em;
+    margin-top: 10px;
 } 

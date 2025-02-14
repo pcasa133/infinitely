@@ -8,6 +8,9 @@ const scoreElement = document.getElementById('score');
 const finalScoreElement = document.getElementById('final-score');
 const timerElement = document.getElementById('timer');
 const gameArea = document.getElementById('game-area');
+const loadingScreen = document.getElementById('loading-screen');
+const loadingProgress = document.querySelector('.loading-progress');
+const loadingText = document.querySelector('.loading-text');
 
 // Configurações do jogo
 const GAME_DURATION = 50; // segundos
@@ -39,6 +42,28 @@ const bombImages = {
 };
 const preloadPromises = [];
 
+// Sistema de Loading
+let totalAssets = 0;
+let loadedAssets = 0;
+
+function updateLoadingProgress() {
+    const progress = (loadedAssets / totalAssets) * 100;
+    loadingProgress.style.width = `${progress}%`;
+    loadingText.textContent = `Carregando assets... ${Math.round(progress)}%`;
+    
+    if (loadedAssets === totalAssets) {
+        setTimeout(() => {
+            loadingScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        }, 500);
+    }
+}
+
+function assetLoaded() {
+    loadedAssets++;
+    updateLoadingProgress();
+}
+
 // Função para carregar moedas de uma fase específica
 async function loadCoinsForPhase(phase, type) {
     const config = {
@@ -56,6 +81,7 @@ async function loadCoinsForPhase(phase, type) {
     const phaseConfig = config[phase][type];
     
     for (let i = 1; i <= COIN_ROTATION_FRAMES; i++) {
+        totalAssets++; // Incrementa o total de assets
         const img = new Image();
         const frameNumber = i.toString().padStart(4, '0');
         const imagePath = `${phaseConfig.path}${phaseConfig.prefix}${frameNumber}.png`;
@@ -64,10 +90,12 @@ async function loadCoinsForPhase(phase, type) {
             img.onload = () => {
                 console.log(`✅ Moeda ${type} ${i}/${COIN_ROTATION_FRAMES} carregada: ${imagePath}`);
                 coinImages[phase][type].push(img);
+                assetLoaded(); // Marca um asset como carregado
                 resolve(img);
             };
             img.onerror = () => {
                 console.error(`❌ Erro ao carregar moeda ${type}: ${imagePath}`);
+                assetLoaded(); // Mesmo com erro, conta como tentativa
                 reject(new Error(`Falha ao carregar ${imagePath}`));
             };
         });
@@ -111,6 +139,7 @@ async function loadBombsForPhase(phase) {
     const loadPromises = [];
     
     for (let i = 1; i <= config.frames; i++) {
+        totalAssets++; // Incrementa o total de assets
         const img = new Image();
         const frameNumber = i.toString().padStart(4, '0');
         const imagePath = `${config.path}${config.prefix}${frameNumber}.png`;
@@ -120,11 +149,13 @@ async function loadBombsForPhase(phase) {
                 console.log(`✅ Bomba ${i}/${config.frames} carregada com sucesso: ${imagePath}`);
                 bombImages[phase].push(img);
                 bombLoadingSuccess++;
+                assetLoaded(); // Marca um asset como carregado
                 resolve(img);
             };
             img.onerror = () => {
                 bombLoadingErrors++;
                 console.error(`❌ ERRO ao carregar bomba ${i}/${config.frames}: ${imagePath}`);
+                assetLoaded(); // Mesmo com erro, conta como tentativa
                 reject(new Error(`Falha ao carregar ${imagePath}`));
             };
         });
@@ -456,6 +487,9 @@ function createCoinInstance() {
             if (bombImg && bombImg.src) {
                 coin.style.backgroundImage = `url(${bombImg.src})`;
             }
+            
+            // Ajustar o intervalo para bombas (mais lento)
+            setTimeout(() => requestAnimationFrame(updateFrame), frameDuration * 2); // Dobro do tempo normal
         } else {
             const coinType = isSpecial ? 'special' : 'normal';
             const phaseCoins = coinImages[`phase${gameState.currentPhase}`][coinType];
