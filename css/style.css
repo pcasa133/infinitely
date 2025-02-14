@@ -253,15 +253,7 @@ button:hover {
 
 /* Modo Discoteca */
 .disco-mode {
-    animation: disco-bg 2s infinite;
-}
-
-@keyframes disco-bg {
-    0% { background: #ff0000; }
-    25% { background: #00ff00; }
-    50% { background: #0000ff; }
-    75% { background: #ff00ff; }
-    100% { background: #ff0000; }
+    animation: none;
 }
 
 /* Tela de Fim de Jogo */
@@ -316,12 +308,12 @@ button:hover {
     }
 }
 
-/* Aplicando shake em toda a página */
-body.camera-shake {
+.camera-shake {
     animation: cameraShake 0.4s cubic-bezier(.36,.07,.19,.97) both;
     transform-origin: center center;
     backface-visibility: hidden;
     perspective: 1000px;
+    animation-iteration-count: 1;
 }
 
 /* Removendo shake individual do game-container */
@@ -425,19 +417,12 @@ body.camera-shake {
 /* Money effect optimization */
 .money-effect {
     position: absolute;
-    color: #2ecc71;
-    font-size: 48px;
+    font-size: 24px;
     font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     pointer-events: none;
+    animation: moneyScorePopup 1s ease-out forwards;
     z-index: 1000;
-    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
-    will-change: transform, opacity;
-    text-shadow: 
-        0 0 10px rgba(46, 204, 113, 0.8),
-        2px 2px 4px rgba(0, 0, 0, 0.5);
-    font-family: 'Chakra Petch', sans-serif;
-    transform: scale(0.8);
-    opacity: 0;
 }
 
 @keyframes moneyScorePopup {
@@ -678,5 +663,88 @@ body.phase-1 .dragon {
     }
     100% {
         background-image: url('../assets/dragon/dragon-01.png');
+    }
+}
+
+/* Animações específicas para bombas - mais lentas */
+@keyframes throwBombLeft {
+    0% {
+        transform: translateY(100vh) translateX(0) rotate(0deg);
+        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    50% {
+        transform: translateY(20vh) translateX(-100px) rotate(540deg);
+        animation-timing-function: cubic-bezier(0.8, 0, 0.8, 1);
+    }
+    100% {
+        transform: translateY(120vh) translateX(-200px) rotate(1080deg);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+}
+
+@keyframes throwBombRight {
+    0% {
+        transform: translateY(100vh) translateX(0) rotate(0deg);
+        animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    50% {
+        transform: translateY(20vh) translateX(100px) rotate(540deg);
+        animation-timing-function: cubic-bezier(0.8, 0, 0.8, 1);
+    }
+    100% {
+        transform: translateY(120vh) translateX(200px) rotate(1080deg);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+}
+
+/* Classes de animação para bombas */
+.bomb.coin-throw-left-fast,
+.bomb.coin-throw-left-very-fast {
+    animation: throwBombLeft 3s forwards, bombGlow 1s infinite alternate !important;
+}
+
+.bomb.coin-throw-right-fast,
+.bomb.coin-throw-right-very-fast {
+    animation: throwBombRight 3s forwards, bombGlow 1s infinite alternate !important;
+}
+
+/* Estilos para as bombas */
+.bomb {
+    position: absolute;
+    width: 124px !important;
+    height: 124px !important;
+    cursor: pointer;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    filter: drop-shadow(0 0 10px #FFD700);
+    opacity: 1;
+    z-index: 100;
+    pointer-events: auto;
+    will-change: transform, opacity;
+    transform-origin: center center;
+    animation-duration: 3s !important;
+}
+
+.bomb:hover {
+    filter: drop-shadow(0 0 20px #FFD700) brightness(1.4);
+}
+
+/* Fase 0 - Estilo da bomba */
+body.phase-0 .bomb {
+    animation: bombGlow 1s infinite alternate;
+}
+
+/* Fase 1 - Estilo da bomba */
+body.phase-1 .bomb {
+    animation: bombGlow 1s infinite alternate;
+}
+
+@keyframes bombGlow {
+    from {
+        filter: drop-shadow(0 0 10px #FFD700) brightness(1.2);
+    }
+    to {
+        filter: drop-shadow(0 0 20px #FFD700) brightness(1.4);
     }
 } 

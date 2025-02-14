@@ -14,36 +14,158 @@ const GAME_DURATION = 50; // segundos
 const COIN_SPAWN_INTERVAL = 1000; // milissegundos
 const SPECIAL_COIN_CHANCE = 0.1; // 10% de chance
 const PHASE_CHANGE_COIN_CHANCE = 0.1; // 10% de chance
+const BOMB_CHANCE = 0.3; // 30% de chance de bomba
 const DISCO_MODE_DURATION = 10; // segundos
 const COIN_ROTATION_FRAMES = 80; // número de frames para animação da moeda
 const COIN_LIFETIME = 2500; // tempo de vida da moeda em milissegundos
 const COIN_ANIMATION_DURATION = 2500; // duração da animação em milissegundos
 const FRAME_DURATION = 30; // duração de cada frame em milissegundos
+const MAX_SIMULTANEOUS_SPAWNS = 3; // número máximo de instâncias simultâneas
 
 // Pré-carregar imagens
-const coinImages = [];
+const coinImages = {
+    'phase0': {
+        'normal': [],
+        'special': []
+    },
+    'phase1': {
+        'normal': [],
+        'special': []
+    }
+};
+const bombImages = {
+    'phase0': [],
+    'phase1': []
+};
 const preloadPromises = [];
 
-for (let i = 0; i <= COIN_ROTATION_FRAMES; i++) {
-    const img = new Image();
-    const frameNumber = i.toString().padStart(3, '0');
-    const imagePath = `assets/coins/brlc_girando_020${frameNumber}.png`;
+// Função para carregar moedas de uma fase específica
+async function loadCoinsForPhase(phase, type) {
+    const config = {
+        'phase0': {
+            'normal': { path: 'assets/novos/brlc_1_azul/', prefix: 'brlc_1_AZUL' },
+            'special': { path: 'assets/novos/brlc_2_azul/', prefix: 'brlc_2_AZUL' }
+        },
+        'phase1': {
+            'normal': { path: 'assets/novos/brlc_1_laranja/', prefix: 'brlc_1_LARANJA' },
+            'special': { path: 'assets/novos/brlc_2_laranja/', prefix: 'brlc_2_LARANJA' }
+        }
+    };
+
+    console.log(`🔄 Carregando moedas ${type} para fase ${phase}...`);
+    const phaseConfig = config[phase][type];
     
-    const promise = new Promise((resolve, reject) => {
-        img.onload = () => {
-            console.log(`Imagem carregada com sucesso: ${imagePath}`);
-            resolve(img);
-        };
-        img.onerror = () => {
-            console.error(`Erro ao carregar imagem: ${imagePath}`);
-            reject(new Error(`Falha ao carregar ${imagePath}`));
-        };
-    });
-    
-    img.src = imagePath;
-    coinImages.push(img);
-    preloadPromises.push(promise);
+    for (let i = 1; i <= COIN_ROTATION_FRAMES; i++) {
+        const img = new Image();
+        const frameNumber = i.toString().padStart(4, '0');
+        const imagePath = `${phaseConfig.path}${phaseConfig.prefix}${frameNumber}.png`;
+        
+        const promise = new Promise((resolve, reject) => {
+            img.onload = () => {
+                console.log(`✅ Moeda ${type} ${i}/${COIN_ROTATION_FRAMES} carregada: ${imagePath}`);
+                coinImages[phase][type].push(img);
+                resolve(img);
+            };
+            img.onerror = () => {
+                console.error(`❌ Erro ao carregar moeda ${type}: ${imagePath}`);
+                reject(new Error(`Falha ao carregar ${imagePath}`));
+            };
+        });
+        
+        img.src = imagePath;
+        preloadPromises.push(promise);
+    }
 }
+
+// Carregar todas as moedas
+Promise.all([
+    loadCoinsForPhase('phase0', 'normal'),
+    loadCoinsForPhase('phase0', 'special'),
+    loadCoinsForPhase('phase1', 'normal'),
+    loadCoinsForPhase('phase1', 'special')
+]).then(() => {
+    console.log('✅ Todas as moedas foram carregadas!');
+}).catch(error => {
+    console.error('❌ Erro ao carregar moedas:', error);
+});
+
+// Carregar imagens das bombas
+console.log('🔄 Iniciando carregamento das bombas...');
+let bombLoadingErrors = 0;
+let bombLoadingSuccess = 0;
+
+// Inicializar arrays para cada fase
+bombImages['phase0'] = [];
+bombImages['phase1'] = [];
+
+// Função para carregar bombas de uma fase específica
+async function loadBombsForPhase(phase) {
+    const phaseConfig = {
+        'phase0': { path: 'assets/novos/bomba_azul/', prefix: 'BOMB_AZUL', frames: 47 },
+        'phase1': { path: 'assets/novos/bomba_laranja/', prefix: '', frames: 47 }
+    };
+    
+    console.log(`🔄 Carregando bombas para fase ${phase}...`);
+    const config = phaseConfig[phase];
+    
+    const loadPromises = [];
+    
+    for (let i = 1; i <= config.frames; i++) {
+        const img = new Image();
+        const frameNumber = i.toString().padStart(4, '0');
+        const imagePath = `${config.path}${config.prefix}${frameNumber}.png`;
+        
+        const promise = new Promise((resolve, reject) => {
+            img.onload = () => {
+                console.log(`✅ Bomba ${i}/${config.frames} carregada com sucesso: ${imagePath}`);
+                bombImages[phase].push(img);
+                bombLoadingSuccess++;
+                resolve(img);
+            };
+            img.onerror = () => {
+                bombLoadingErrors++;
+                console.error(`❌ ERRO ao carregar bomba ${i}/${config.frames}: ${imagePath}`);
+                reject(new Error(`Falha ao carregar ${imagePath}`));
+            };
+        });
+        
+        img.src = imagePath;
+        loadPromises.push(promise);
+    }
+    
+    try {
+        await Promise.all(loadPromises);
+        console.log(`✅ Todas as bombas da fase ${phase} foram carregadas com sucesso!`);
+        console.log(`📊 Bombas carregadas para fase ${phase}: ${bombImages[phase].length}`);
+    } catch (error) {
+        console.error(`❌ Erro ao carregar bombas da fase ${phase}:`, error);
+    }
+}
+
+// Carregar bombas para ambas as fases
+Promise.all([
+    loadBombsForPhase('phase0'),
+    loadBombsForPhase('phase1')
+]).then(() => {
+    console.log('✅ Carregamento de todas as bombas concluído!');
+    console.log(`📊 Estatísticas finais de carregamento:
+    - Total de bombas carregadas: ${bombLoadingSuccess}
+    - Total de erros: ${bombLoadingErrors}
+    - Bombas fase 0: ${bombImages['phase0'].length}
+    - Bombas fase 1: ${bombImages['phase1'].length}
+    `);
+    
+    // Verificar se as imagens têm src válido
+    console.log('🔍 Verificando URLs das bombas:');
+    for (const phase in bombImages) {
+        console.log(`\nFase ${phase}:`);
+        bombImages[phase].forEach((img, index) => {
+            console.log(`Bomba ${index + 1}: ${img.src}`);
+        });
+    }
+}).catch(error => {
+    console.error('❌ Erro no carregamento das bombas:', error);
+});
 
 // Estado do jogo
 let gameState = {
@@ -159,6 +281,18 @@ function startGame() {
 function spawnCoin() {
     if (!gameState.isRunning) return;
 
+    // Número aleatório de instâncias para spawnar (1 a 3)
+    const numSpawns = Math.floor(Math.random() * MAX_SIMULTANEOUS_SPAWNS) + 1;
+    
+    for (let i = 0; i < numSpawns; i++) {
+        setTimeout(() => {
+            createCoinInstance();
+        }, i * 100); // Pequeno delay entre spawns múltiplos
+    }
+}
+
+// Nova função que contém a lógica original de spawn
+function createCoinInstance() {
     const coin = document.createElement('div');
     coin.className = 'coin';
     
@@ -175,16 +309,84 @@ function spawnCoin() {
     const startX = Math.random() * maxX;
     coin.style.left = `${startX}px`;
     
-    // Determinar tipo de moeda primeiro
-    // Só gera moeda de mudança de fase se estiver na fase 0
-    const isPhaseChange = gameState.currentPhase === 0 && Math.random() < PHASE_CHANGE_COIN_CHANCE;
-    const isSpecial = !isPhaseChange && Math.random() < SPECIAL_COIN_CHANCE;
+    // Determinar tipo de moeda/bomba
+    const isBomb = Math.random() < BOMB_CHANCE;
+    const currentPhase = `phase${gameState.currentPhase}`;
     
-    // Adicionar classes específicas do tipo de moeda
-    if (isPhaseChange) {
-        coin.classList.add('phase-change-coin');
-    } else if (isSpecial) {
-        coin.classList.add('special-coin');
+    console.log(`Sorteio de tipo: ${isBomb ? 'BOMBA' : 'MOEDA'} (chance: ${BOMB_CHANCE})`);
+    
+    const isPhaseChange = !isBomb && gameState.currentPhase === 0 && Math.random() < PHASE_CHANGE_COIN_CHANCE;
+    const isSpecial = !isBomb && !isPhaseChange && Math.random() < SPECIAL_COIN_CHANCE;
+    
+    let frame = 0;
+    
+    if (isBomb) {
+        console.log('💣 Criando uma bomba...');
+        coin.classList.add('bomb');
+        
+        const phaseBombs = bombImages[currentPhase];
+        
+        console.log(`🔍 Debug bomba:
+        - Fase atual: ${currentPhase}
+        - Bombas disponíveis: ${phaseBombs ? phaseBombs.length : 0}
+        - Array de bombas existe: ${!!phaseBombs}
+        - gameState.currentPhase: ${gameState.currentPhase}
+        `);
+        
+        if (!phaseBombs || phaseBombs.length === 0) {
+            console.error(`❌ ERRO: Nenhuma bomba carregada para a fase ${gameState.currentPhase}!`);
+            return;
+        }
+        
+        frame = Math.floor(Math.random() * phaseBombs.length);
+        const bombImg = phaseBombs[frame];
+        
+        if (bombImg && bombImg.src) {
+            console.log(`✅ Definindo imagem da bomba: ${bombImg.src}`);
+            coin.style.backgroundImage = `url(${bombImg.src})`;
+            coin.style.backgroundSize = 'contain';
+            coin.style.backgroundRepeat = 'no-repeat';
+            coin.style.backgroundPosition = 'center';
+            coin.style.width = '124px';
+            coin.style.height = '124px';
+            coin.style.zIndex = '100';
+            
+            // Verificar se a imagem está realmente carregada
+            const testImg = new Image();
+            testImg.onload = () => console.log('✅ Imagem da bomba carregada com sucesso');
+            testImg.onerror = () => console.error('❌ Erro ao carregar imagem da bomba');
+            testImg.src = bombImg.src;
+        } else {
+            console.error('❌ ERRO: Imagem da bomba não encontrada!', {
+                phase: currentPhase,
+                frame,
+                hasBombImages: phaseBombs.length > 0,
+                numImages: phaseBombs.length,
+                frameExists: !!bombImg,
+                imgSrc: bombImg ? bombImg.src : null
+            });
+        }
+    } else {
+        const coinType = isSpecial ? 'special' : 'normal';
+        const phaseCoins = coinImages[currentPhase][coinType];
+        
+        if (!phaseCoins || phaseCoins.length === 0) {
+            console.error(`❌ ERRO: Nenhuma moeda ${coinType} carregada para a fase ${gameState.currentPhase}!`);
+            return;
+        }
+        
+        frame = Math.floor(Math.random() * phaseCoins.length);
+        const coinImg = phaseCoins[frame];
+        
+        if (coinImg && coinImg.src) {
+            coin.style.backgroundImage = `url(${coinImg.src})`;
+        }
+        
+        if (isPhaseChange) {
+            coin.classList.add('phase-change-coin');
+        } else if (isSpecial) {
+            coin.classList.add('special-coin');
+        }
     }
 
     // Configurar animação de movimento (igual para todas as moedas)
@@ -212,7 +414,7 @@ function spawnCoin() {
         coin.style.opacity = '0';
         
         const event = new CustomEvent('coinClick', { 
-            detail: { coin, isSpecial, isPhaseChange } 
+            detail: { coin, isSpecial, isPhaseChange, isBomb } 
         });
         document.dispatchEvent(event);
         
@@ -230,71 +432,56 @@ function spawnCoin() {
     coin.addEventListener('click', clickHandler);
     gameState.activeCoins.add(coin);
 
-    // Animação de rotação com frame inicial aleatório e velocidade variável
-    let frame;
-    // 40% de chance de começar próximo ao frame 26
-    if (Math.random() < 0.4) {
-        // Gera um número aleatório entre 20 e 32 (26 ± 6)
-        frame = Math.floor(20 + Math.random() * 12);
-    } else {
-        // Para as demais moedas, mantém o comportamento aleatório original
-        frame = Math.floor(Math.random() * COIN_ROTATION_FRAMES);
-    }
-
-    const rotationSpeed = 0.8 + Math.random() * 0.4; // Velocidade entre 0.8x e 1.2x
+    const rotationSpeed = 0.8 + Math.random() * 0.4;
     const frameDuration = FRAME_DURATION * rotationSpeed;
     
-    // Determinar direção da rotação e comportamento
-    const rotateReverse = Math.random() < 0.3; // 30% de chance de girar ao contrário
-    const oscillate = Math.random() < 0.2; // 20% de chance de oscilar
-    let direction = rotateReverse ? -1 : 1;
-    let oscillationCount = 0;
+    // Manter o frame inicial separado do frame atual
+    let currentFrame = frame;
     
     const updateFrame = () => {
         if (!gameState.isRunning || !coin.parentNode) return;
         
-        // Lógica de oscilação
-        if (oscillate) {
-            oscillationCount++;
-            if (oscillationCount >= 20) { // Muda direção a cada 20 frames
-                direction *= -1;
-                oscillationCount = 0;
+        if (isBomb) {
+            const currentPhase = `phase${gameState.currentPhase}`;
+            const phaseBombs = bombImages[currentPhase];
+            
+            if (!phaseBombs || phaseBombs.length === 0) {
+                console.error('❌ ERRO: Nenhuma bomba disponível para animação na fase', gameState.currentPhase);
+                return;
+            }
+            
+            currentFrame = (currentFrame + 1) % phaseBombs.length;
+            const bombImg = phaseBombs[currentFrame];
+            
+            if (bombImg && bombImg.src) {
+                coin.style.backgroundImage = `url(${bombImg.src})`;
+            }
+        } else {
+            const coinType = isSpecial ? 'special' : 'normal';
+            const phaseCoins = coinImages[`phase${gameState.currentPhase}`][coinType];
+            
+            if (!phaseCoins || phaseCoins.length === 0) {
+                console.error(`❌ ERRO: Nenhuma moeda ${coinType} disponível para animação na fase ${gameState.currentPhase}`);
+                return;
+            }
+            
+            currentFrame = (currentFrame + 1) % phaseCoins.length;
+            const coinImg = phaseCoins[currentFrame];
+            
+            if (coinImg && coinImg.src) {
+                coin.style.backgroundImage = `url(${coinImg.src})`;
             }
         }
         
-        // Incrementa o frame com base na direção
-        frame = (frame + direction + COIN_ROTATION_FRAMES) % COIN_ROTATION_FRAMES;
-        
-        // Aplica a imagem atual
-        if (coinImages[frame] && coinImages[frame].src) {
-            coin.style.backgroundImage = `url(${coinImages[frame].src})`;
-        }
-        
-        // Adiciona rotação 3D aleatória
-        const rotationX = Math.sin(Date.now() * 0.001 * rotationSpeed) * 15;
-        const rotationY = Math.cos(Date.now() * 0.001 * rotationSpeed) * 15;
-        coin.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
-        
-        // Continua a animação se a moeda ainda existir
         if (coin.parentNode) {
-            requestAnimationFrame(() => {
-                setTimeout(updateFrame, frameDuration);
-            });
+            setTimeout(() => requestAnimationFrame(updateFrame), frameDuration);
         }
     };
     
-    // Inicia com o frame aleatório
-    if (coinImages[frame] && coinImages[frame].src) {
-        coin.style.backgroundImage = `url(${coinImages[frame].src})`;
-    }
-    
-    // Adiciona perspectiva 3D ao elemento
-    coin.style.perspective = '1000px';
-    coin.style.transformStyle = 'preserve-3d';
-    
     // Inicia a animação com um pequeno delay aleatório
     setTimeout(updateFrame, Math.random() * 100);
-
+    
+    // Adiciona ao game area
     gameArea.appendChild(coin);
 
     // Remover moeda após a animação
@@ -308,7 +495,7 @@ function spawnCoin() {
                 }
             }, 300);
         }
-    }, COIN_LIFETIME);
+    }, isBomb ? 4000 : COIN_LIFETIME); // Bombas têm 4 segundos de vida, moedas continuam com 2.5 segundos
 }
 
 // Funções de efeitos visuais
@@ -367,69 +554,80 @@ function applyCameraShake() {
     document.body.classList.add('camera-shake');
     setTimeout(() => {
         document.body.classList.remove('camera-shake');
-    }, 400); // Increased to match the new animation duration
+    }, 400);
 }
 
-function createMoneyEffect(x, y, isSpecial = false, isPhaseChange = false) {
-    const money = document.createElement('div');
-    money.className = 'money-effect';
-    money.style.left = `${x}px`;
-    money.style.top = `${y}px`;
-    money.style.willChange = 'transform, opacity';
+function createMoneyEffect(x, y, isSpecial = false, isPhaseChange = false, isBomb = false) {
+    const effect = document.createElement('div');
+    effect.className = 'money-effect';
     
-    // Determinar o texto baseado no tipo de moeda e fase
-    let pointValue;
-    if (isPhaseChange) {
-        pointValue = '+10';
+    let text, color;
+    const isPhase1 = gameState.currentPhase === 1;
+    
+    if (isBomb) {
+        text = '-3';
+        color = '#FFD700'; // Amarelo para bomba
+    } else if (isPhaseChange) {
+        text = '+1';
+        color = '#FF00FF'; // Rosa para mudança de fase
     } else if (isSpecial) {
-        pointValue = '+5';
+        text = '+2';
+        color = isPhase1 ? '#ff3333' : '#00B4D8'; // Vermelho na fase 1, azul na fase 0
     } else {
-        pointValue = gameState.currentPhase === 0 ? '+1' : '+2';
+        text = isPhase1 ? '+2' : '+1'; // +2 na fase 1, +1 na fase 0
+        color = isPhase1 ? '#ff3333' : '#00B4D8'; // Vermelho na fase 1, azul na fase 0
     }
-    money.textContent = pointValue;
     
-    gameArea.appendChild(money);
-
-    // Use the new animation
-    requestAnimationFrame(() => {
-        money.style.animation = 'moneyScorePopup 0.8s ease-out forwards';
-    });
-
+    effect.textContent = text;
+    effect.style.color = color;
+    effect.style.left = `${x}px`;
+    effect.style.top = `${y}px`;
+    
+    gameArea.appendChild(effect);
+    
     setTimeout(() => {
-        if (money.parentNode === gameArea) {
-            gameArea.removeChild(money);
+        if (effect.parentNode === gameArea) {
+            gameArea.removeChild(effect);
         }
-    }, 800);
+    }, 1000);
 }
 
-// Modificar a função collectCoin para melhorar a sequência de efeitos
+// Modificar a função collectCoin para tratar as bombas
 function collectCoin(event) {
-    const { coin, isSpecial, isPhaseChange } = event.detail;
+    const { coin, isSpecial, isPhaseChange, isBomb } = event.detail;
+    const isPhase1 = gameState.currentPhase === 1;
+    
     const rect = coin.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
 
-    // Criar efeitos visuais
-    createExplosion(centerX, centerY);
-    createSplash(centerX, centerY);
-    applyCameraShake();
-    createMoneyEffect(centerX, centerY, isSpecial, isPhaseChange);
-
-    // Atualizar pontuação
-    if (isPhaseChange) {
+    if (isBomb) {
+        // Reduz 3 pontos e cria efeito visual
+        gameState.score = Math.max(0, gameState.score - 3);
+        createExplosion(x, y);
+        createMoneyEffect(x, y, false, false, true);
+        applyCameraShake();
+    } else if (isPhaseChange) {
+        gameState.score += 1;
+        createSplash(x, y);
+        createMoneyEffect(x, y, false, true);
+        applyCameraShake();
         changePhase();
-        gameState.score += 10; // Bônus por mudar de fase
     } else if (isSpecial) {
+        gameState.score += 2;
+        createSplash(x, y);
+        createMoneyEffect(x, y, true);
+        applyCameraShake();
         activateDiscoMode();
-        gameState.score += 5; // Bônus por moeda especial
-        gameState.timeRemaining += 15;
     } else {
-        // Pontuação normal baseada na fase
-        gameState.score += gameState.currentPhase === 0 ? 1 : 2;
+        // Pontos normais baseados na fase
+        gameState.score += isPhase1 ? 2 : 1;
+        createSplash(x, y);
+        createMoneyEffect(x, y);
+        applyCameraShake();
     }
-
+    
     updateScore();
-    updateTimer();
 }
 
 // Ativar modo discoteca
@@ -582,8 +780,8 @@ function createDragon() {
     const dragon = document.createElement('div');
     dragon.className = 'dragon';
     
-    // Altura aleatória para o voo (ajustada para o novo tamanho)
-    const flyHeight = Math.random() * 400 + 50; // entre 50px e 450px do topo
+    // Altura aleatória para o voo (ajustada para voar mais alto)
+    const flyHeight = Math.random() * 200 + 50; // entre 50px e 250px do topo
     dragon.style.setProperty('--fly-height', `${flyHeight}px`);
     
     // Duração do voo mais consistente
