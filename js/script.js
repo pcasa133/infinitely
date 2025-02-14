@@ -68,12 +68,12 @@ function assetLoaded() {
 async function loadCoinsForPhase(phase, type) {
     const config = {
         'phase0': {
-            'normal': { path: 'assets/novos/brlc_1_azul/', prefix: 'brlc_1_AZUL' },
-            'special': { path: 'assets/novos/brlc_2_azul/', prefix: 'brlc_2_AZUL' }
+            'normal': { path: '../assets/novos/brlc_1_azul/', prefix: 'brlc_1_AZUL' },
+            'special': { path: '../assets/novos/brlc_2_azul/', prefix: 'brlc_2_AZUL' }
         },
         'phase1': {
-            'normal': { path: 'assets/novos/brlc_1_laranja/', prefix: 'brlc_1_LARANJA' },
-            'special': { path: 'assets/novos/brlc_2_laranja/', prefix: 'brlc_2_LARANJA' }
+            'normal': { path: '../assets/novos/brlc_1_laranja/', prefix: 'brlc_1_LARANJA' },
+            'special': { path: '../assets/novos/brlc_2_laranja/', prefix: 'brlc_2_LARANJA' }
         }
     };
 
@@ -129,8 +129,8 @@ bombImages['phase1'] = [];
 // Função para carregar bombas de uma fase específica
 async function loadBombsForPhase(phase) {
     const phaseConfig = {
-        'phase0': { path: 'assets/novos/bomba_azul/', prefix: 'BOMB_AZUL', frames: 47 },
-        'phase1': { path: 'assets/novos/bomba_laranja/', prefix: '', frames: 47 }
+        'phase0': { path: '../assets/novos/bomba_azul/', prefix: 'BOMB_AZUL', frames: 47 },
+        'phase1': { path: '../assets/novos/bomba_laranja/', prefix: '', frames: 47 }
     };
     
     console.log(`🔄 Carregando bombas para fase ${phase}...`);

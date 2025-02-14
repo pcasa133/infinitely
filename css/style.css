@@ -109,7 +109,7 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100vh;
-    background: url('assets/imgs/Background_sky.jpg') no-repeat center center fixed;
+    background: url('../assets/imgs/Background_sky.jpg') no-repeat center center fixed;
     background-size: cover;
     z-index: 1;
     overflow: hidden;
@@ -452,44 +452,44 @@ button:hover {
 
 /* Phase 0 Clouds */
 body.phase-0 .cloud-01 {
-    background-image: url('/assets/phase0/Cloud_Blue_01.png');
+    background-image: url('assets/phase0/Cloud_Blue_01.png');
 }
 
 body.phase-0 .cloud-02 {
-    background-image: url('/assets/phase0/Cloud_Blue_02.png');
+    background-image: url('assets/phase0/Cloud_Blue_02.png');
 }
 
 body.phase-0 .cloud-03 {
-    background-image: url('/assets/phase0/Cloud_Blue_03.png');
+    background-image: url('assets/phase0/Cloud_Blue_03.png');
 }
 
 body.phase-0 .cloud-04 {
-    background-image: url('/assets/phase0/Cloud_Blue_04.png');
+    background-image: url('assets/phase0/Cloud_Blue_04.png');
 }
 
 body.phase-0 .cloud-05 {
-    background-image: url('/assets/phase0/Cloud_Blue_05.png');
+    background-image: url('assets/phase0/Cloud_Blue_05.png');
 }
 
 /* Phase 1 Clouds */
 body.phase-1 .cloud-01 {
-    background-image: url('/assets/phase1/Cloud_Red_01.png');
+    background-image: url('assets/phase1/Cloud_Red_01.png');
 }
 
 body.phase-1 .cloud-02 {
-    background-image: url('/assets/phase1/Cloud_Red_02.png');
+    background-image: url('assets/phase1/Cloud_Red_02.png');
 }
 
 body.phase-1 .cloud-03 {
-    background-image: url('/assets/phase1/Cloud_Red_03.png');
+    background-image: url('assets/phase1/Cloud_Red_03.png');
 }
 
 body.phase-1 .cloud-04 {
-    background-image: url('/assets/phase1/Cloud_Red_04.png');
+    background-image: url('assets/phase1/Cloud_Red_04.png');
 }
 
 body.phase-1 .cloud-05 {
-    background-image: url('/assets/phase1/Cloud_Red_05.png');
+    background-image: url('assets/phase1/Cloud_Red_05.png');
 }
 
 @keyframes moveCloud {
@@ -547,7 +547,7 @@ body.phase-1 .cloud-05 {
 
 /* Estilos específicos para Phase 0 (Fase Azul - Inicial) */
 body.phase-0 #game-screen {
-    background: url('assets/phase0/Background_sky.jpg') no-repeat center center fixed;
+    background: url('../assets/phase0/Background_sky.jpg') no-repeat center center fixed;
     background-size: cover;
 }
 
@@ -588,7 +588,7 @@ body.phase-0 .money-effect {
 
 /* Estilos específicos para Phase 1 (Fase Vermelha) */
 body.phase-1 #game-screen {
-    background: url('assets/phase1/Background_phase_01.jpg') no-repeat center center fixed;
+    background: url('../assets/phase1/Background_phase_01.jpg') no-repeat center center fixed;
     background-size: cover;
 }
 
@@ -656,13 +656,13 @@ body.phase-1 .dragon {
 
 @keyframes flapWings {
     0%, 45% {
-        background-image: url('assets/dragon/dragon-01.png');
+        background-image: url('../assets/dragon/dragon-01.png');
     }
     50%, 95% {
-        background-image: url('assets/dragon/dragon-02.png');
+        background-image: url('../assets/dragon/dragon-02.png');
     }
     100% {
-        background-image: url('assets/dragon/dragon-01.png');
+        background-image: url('../assets/dragon/dragon-01.png');
     }
 }
 
