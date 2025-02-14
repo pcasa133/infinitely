@@ -113,6 +113,7 @@ button:hover {
     background-size: cover;
     z-index: 1;
     overflow: hidden;
+    transition: background-image 1s ease-in-out;
 }
 
 #game-area {
@@ -459,59 +460,51 @@ body.camera-shake {
     position: absolute;
     background-repeat: no-repeat;
     background-size: contain;
-    z-index: 2;
-    width: 250px;
-    height: 150px;
-    animation: moveCloud linear infinite;
+    z-index: 1;
+    pointer-events: none;
+    transition: background-image 0.3s ease-in-out;
 }
 
-.cloud-01 {
-    left: -250px;
-    top: 117px;
-    background-image: url('../assets/imgs/Cloud_01.png');
-    animation-duration: 30s;
-    width: 260px;
-    height: 155px;
+/* Phase 0 Clouds */
+body.phase-0 .cloud-01 {
+    background-image: url('../assets/phase0/Cloud_Blue_01.png');
 }
 
-.cloud-02 {
-    left: -250px;
-    top: 32px;
-    background-image: url('../assets/imgs/Cloud_02.png');
-    animation-duration: 35s;
-    animation-delay: -15s;
-    width: 240px;
-    height: 140px;
+body.phase-0 .cloud-02 {
+    background-image: url('../assets/phase0/Cloud_Blue_02.png');
 }
 
-.cloud-03 {
-    left: -250px;
-    top: 473px;
-    background-image: url('../assets/imgs/Cloud_03.png');
-    animation-duration: 32s;
-    animation-delay: -22s;
-    width: 270px;
-    height: 160px;
+body.phase-0 .cloud-03 {
+    background-image: url('../assets/phase0/Cloud_Blue_03.png');
 }
 
-.cloud-04 {
-    left: -250px;
-    top: 530px;
-    background-image: url('../assets/imgs/Cloud_04.png');
-    animation-duration: 38s;
-    animation-delay: -5s;
-    width: 245px;
-    height: 145px;
+body.phase-0 .cloud-04 {
+    background-image: url('../assets/phase0/Cloud_Blue_04.png');
 }
 
-.cloud-05 {
-    left: -250px;
-    top: 465px;
-    background-image: url('../assets/imgs/Cloud_05.png');
-    animation-duration: 34s;
-    animation-delay: -28s;
-    width: 255px;
-    height: 150px;
+body.phase-0 .cloud-05 {
+    background-image: url('../assets/phase0/Cloud_Blue_05.png');
+}
+
+/* Phase 1 Clouds */
+body.phase-1 .cloud-01 {
+    background-image: url('../assets/phase1/Cloud_Red_01.png');
+}
+
+body.phase-1 .cloud-02 {
+    background-image: url('../assets/phase1/Cloud_Red_02.png');
+}
+
+body.phase-1 .cloud-03 {
+    background-image: url('../assets/phase1/Cloud_Red_03.png');
+}
+
+body.phase-1 .cloud-04 {
+    background-image: url('../assets/phase1/Cloud_Red_04.png');
+}
+
+body.phase-1 .cloud-05 {
+    background-image: url('../assets/phase1/Cloud_Red_05.png');
 }
 
 @keyframes moveCloud {
@@ -567,44 +560,123 @@ body.camera-shake {
     }
 }
 
-/* Phase 2 Styles */
-.phase-2 #game-screen {
-    background: url('../assets/imgs/Background_phase_01.jpg') no-repeat center center fixed;
+/* Estilos específicos para Phase 0 (Fase Azul - Inicial) */
+body.phase-0 #game-screen {
+    background: url('../assets/phase0/Background_sky.jpg') no-repeat center center fixed;
     background-size: cover;
 }
 
-.phase-2 .hud {
+body.phase-0 .hud {
+    background: rgba(2, 62, 138, 0.85);
+    color: #CAF0F8;
+}
+
+body.phase-0 .coin:hover {
+    filter: drop-shadow(0 0 15px #00B4D8) brightness(1.3);
+    z-index: 20;
+}
+
+body.phase-0 .special-coin {
+    filter: drop-shadow(0 0 10px #90E0EF) brightness(1.2);
+    z-index: 15;
+}
+
+body.phase-0 .special-coin:hover {
+    filter: drop-shadow(0 0 20px #90E0EF) brightness(1.4);
+}
+
+body.phase-0 .splash-particle {
+    background: #48CAE4;
+    box-shadow: 0 0 10px #00B4D8;
+}
+
+body.phase-0 .explosion {
+    filter: none;
+}
+
+body.phase-0 .money-effect {
+    color: #2ecc71;
+    text-shadow: 
+        0 0 10px rgba(46, 204, 113, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Estilos específicos para Phase 1 (Fase Vermelha) */
+body.phase-1 #game-screen {
+    background: url('../assets/phase1/Background_phase_01.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+body.phase-1 .hud {
     background: rgba(138, 2, 2, 0.85);
     color: #F8CAD0;
 }
 
-.phase-2 .coin:hover {
+body.phase-1 .coin:hover {
     filter: drop-shadow(0 0 15px #ff3333) brightness(1.3);
     z-index: 20;
 }
 
-.phase-2 .special-coin {
+body.phase-1 .special-coin {
     filter: drop-shadow(0 0 10px #ff6666) brightness(1.2);
     z-index: 15;
 }
 
-.phase-2 .special-coin:hover {
+body.phase-1 .special-coin:hover {
     filter: drop-shadow(0 0 20px #ff3333) brightness(1.4);
 }
 
-.phase-2 .splash-particle {
+body.phase-1 .splash-particle {
     background: #ff6666;
     box-shadow: 0 0 10px #ff3333;
 }
 
-.phase-2 .explosion {
+body.phase-1 .explosion {
     filter: hue-rotate(320deg);
 }
 
-/* Ajuste do efeito de explosão para fase 2 */
-.phase-2 .money-effect {
+body.phase-1 .money-effect {
     color: #ff3333;
     text-shadow: 
         0 0 10px rgba(255, 51, 51, 0.8),
         2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Dragon Animation */
+.dragon {
+    position: absolute;
+    width: 270px;
+    height: 270px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    left: -270px;
+}
+
+body.phase-1 .dragon {
+    opacity: 1;
+}
+
+@keyframes flyDragon {
+    0% {
+        transform: translateX(-270px) translateY(var(--fly-height));
+    }
+    100% {
+        transform: translateX(calc(100vw + 270px)) translateY(var(--fly-height));
+    }
+}
+
+@keyframes flapWings {
+    0%, 45% {
+        background-image: url('../assets/dragon/dragon-01.png');
+    }
+    50%, 95% {
+        background-image: url('../assets/dragon/dragon-02.png');
+    }
+    100% {
+        background-image: url('../assets/dragon/dragon-01.png');
+    }
 } 

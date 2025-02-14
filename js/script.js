@@ -55,7 +55,8 @@ let gameState = {
     timerInterval: null,
     discoTimeout: null,
     activeCoins: new Set(),
-    currentPhase: 1
+    currentPhase: 0,
+    dragonInterval: null // Novo: para controlar o intervalo do dragão
 };
 
 // Inicialização
@@ -63,6 +64,52 @@ function init() {
     startButton.addEventListener('click', startGame);
     restartButton.addEventListener('click', startGame);
     document.addEventListener('coinClick', collectCoin);
+}
+
+function createClouds() {
+    // Remover nuvens antigas
+    const oldClouds = document.querySelectorAll('.cloud');
+    oldClouds.forEach(cloud => cloud.remove());
+
+    // Criar novas nuvens
+    const cloudConfigs = [
+        { top: '117px', width: '260px', height: '155px', delay: '0s', duration: '30s' },
+        { top: '32px', width: '240px', height: '140px', delay: '-15s', duration: '35s' },
+        { top: '473px', width: '270px', height: '160px', delay: '-22s', duration: '32s' },
+        { top: '530px', width: '245px', height: '145px', delay: '-5s', duration: '38s' },
+        { top: '465px', width: '255px', height: '150px', delay: '-28s', duration: '34s' }
+    ];
+
+    const cloudContainer = document.createElement('div');
+    cloudContainer.id = 'cloud-container';
+    cloudContainer.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+    `;
+    gameScreen.insertBefore(cloudContainer, gameArea);
+
+    cloudConfigs.forEach((config, index) => {
+        const cloud = document.createElement('div');
+        cloud.className = `cloud cloud-0${index + 1}`;
+        cloud.style.cssText = `
+            position: absolute;
+            left: -250px;
+            top: ${config.top};
+            width: ${config.width};
+            height: ${config.height};
+            animation: moveCloud ${config.duration} linear infinite;
+            animation-delay: ${config.delay};
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+        `;
+        cloudContainer.appendChild(cloud);
+    });
 }
 
 // Iniciar jogo
@@ -77,13 +124,21 @@ function startGame() {
         timerInterval: null,
         discoTimeout: null,
         activeCoins: new Set(),
-        currentPhase: 1
+        currentPhase: 0,
+        dragonInterval: null // Novo: para controlar o intervalo do dragão
     };
 
     // Esconder/mostrar telas
     startScreen.classList.add('hidden');
     endScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
+
+    // Remover classes de fase anteriores e adicionar fase inicial
+    document.body.classList.remove('phase-0', 'phase-1', 'phase-2');
+    document.body.classList.add('phase-0');
+
+    // Criar nuvens
+    createClouds();
 
     // Garantir que o HUD esteja visível
     const hud = document.querySelector('.hud');
@@ -121,7 +176,8 @@ function spawnCoin() {
     coin.style.left = `${startX}px`;
     
     // Determinar tipo de moeda primeiro
-    const isPhaseChange = Math.random() < PHASE_CHANGE_COIN_CHANCE;
+    // Só gera moeda de mudança de fase se estiver na fase 0
+    const isPhaseChange = gameState.currentPhase === 0 && Math.random() < PHASE_CHANGE_COIN_CHANCE;
     const isSpecial = !isPhaseChange && Math.random() < SPECIAL_COIN_CHANCE;
     
     // Adicionar classes específicas do tipo de moeda
@@ -314,22 +370,23 @@ function applyCameraShake() {
     }, 400); // Increased to match the new animation duration
 }
 
-function createMoneyEffect(x, y) {
+function createMoneyEffect(x, y, isSpecial = false, isPhaseChange = false) {
     const money = document.createElement('div');
     money.className = 'money-effect';
     money.style.left = `${x}px`;
     money.style.top = `${y}px`;
     money.style.willChange = 'transform, opacity';
     
-    // Determinar o texto baseado na fase atual
-    const pointValue = gameState.currentPhase === 1 ? '+1' : '+2';
-    money.textContent = pointValue;
-    
-    // Ajustar a cor baseada na fase
-    if (gameState.currentPhase === 2) {
-        money.style.color = '#ff3333';
-        money.style.textShadow = '0 0 10px rgba(255, 51, 51, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.5)';
+    // Determinar o texto baseado no tipo de moeda e fase
+    let pointValue;
+    if (isPhaseChange) {
+        pointValue = '+10';
+    } else if (isSpecial) {
+        pointValue = '+5';
+    } else {
+        pointValue = gameState.currentPhase === 0 ? '+1' : '+2';
     }
+    money.textContent = pointValue;
     
     gameArea.appendChild(money);
 
@@ -356,18 +413,19 @@ function collectCoin(event) {
     createExplosion(centerX, centerY);
     createSplash(centerX, centerY);
     applyCameraShake();
-    createMoneyEffect(centerX, centerY);
+    createMoneyEffect(centerX, centerY, isSpecial, isPhaseChange);
 
     // Atualizar pontuação
     if (isPhaseChange) {
         changePhase();
-        gameState.score += 10;
+        gameState.score += 10; // Bônus por mudar de fase
     } else if (isSpecial) {
         activateDiscoMode();
-        gameState.score += 5;
+        gameState.score += 5; // Bônus por moeda especial
         gameState.timeRemaining += 15;
     } else {
-        gameState.score += gameState.currentPhase === 1 ? 1 : 2;
+        // Pontuação normal baseada na fase
+        gameState.score += gameState.currentPhase === 0 ? 1 : 2;
     }
 
     updateScore();
@@ -442,16 +500,52 @@ function cleanupGame() {
         }
     });
     gameState.activeCoins.clear();
+    
+    // Remover dragões e limpar intervalo
+    const dragons = document.querySelectorAll('.dragon');
+    dragons.forEach(dragon => dragon.remove());
+    
+    if (gameState.dragonInterval) {
+        clearInterval(gameState.dragonInterval);
+        gameState.dragonInterval = null;
+    }
 }
 
 // Mudar de fase
 function changePhase() {
-    gameState.currentPhase = 2;
-    document.body.classList.add('phase-2');
+    console.log('Changing phase...');
     
-    // Atualizar visual do jogo
-    const gameScreen = document.getElementById('game-screen');
-    gameScreen.style.transition = 'background 1s ease-in-out';
+    // Limpar intervalo existente do dragão
+    if (gameState.dragonInterval) {
+        clearInterval(gameState.dragonInterval);
+        gameState.dragonInterval = null;
+    }
+    
+    // Remover classes de fase anteriores
+    document.body.classList.remove('phase-0', 'phase-1');
+    
+    // Incrementar a fase atual (máximo fase 1)
+    gameState.currentPhase = Math.min(1, gameState.currentPhase + 1);
+    console.log('New phase:', gameState.currentPhase);
+    
+    // Adicionar a classe da nova fase
+    document.body.classList.add(`phase-${gameState.currentPhase}`);
+
+    // Recriar nuvens
+    createClouds();
+    
+    // Criar dragão se estiver na fase 1
+    if (gameState.currentPhase === 1) {
+        // Primeiro dragão após um pequeno delay
+        setTimeout(createDragon, 2000);
+        
+        // Configurar intervalo para novos dragões
+        gameState.dragonInterval = setInterval(() => {
+            if (gameState.isRunning && gameState.currentPhase === 1) {
+                createDragon();
+            }
+        }, 25000); // Novo dragão a cada 25 segundos
+    }
     
     // Flash effect
     const flash = document.createElement('div');
@@ -476,6 +570,40 @@ function changePhase() {
             }, 300);
         }, 100);
     }, 0);
+}
+
+function createDragon() {
+    // Se já existir um dragão voando, não criar outro
+    const existingDragon = document.querySelector('.dragon');
+    if (existingDragon) {
+        return;
+    }
+
+    const dragon = document.createElement('div');
+    dragon.className = 'dragon';
+    
+    // Altura aleatória para o voo (ajustada para o novo tamanho)
+    const flyHeight = Math.random() * 400 + 50; // entre 50px e 450px do topo
+    dragon.style.setProperty('--fly-height', `${flyHeight}px`);
+    
+    // Duração do voo mais consistente
+    const flyDuration = Math.random() * 5 + 20; // entre 20 e 25 segundos
+    
+    // Configurar animações - bater de asas mais lento (2 segundos)
+    dragon.style.animation = `
+        flyDragon ${flyDuration}s linear,
+        flapWings 2s steps(1) infinite
+    `;
+    
+    // Remover o dragão quando a animação terminar
+    dragon.addEventListener('animationend', (event) => {
+        if (event.animationName === 'flyDragon') {
+            dragon.remove();
+        }
+    });
+    
+    // Adicionar ao game screen antes do game area
+    gameScreen.insertBefore(dragon, gameArea);
 }
 
 // Iniciar o jogo
