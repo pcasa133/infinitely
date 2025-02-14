@@ -25,6 +25,7 @@ Um jogo divertido de coletar moedas desenvolvido com HTML, CSS e JavaScript puro
 - CSS3 (Animações e Transições)
 - JavaScript (ES6+)
 - Sprites e Assets Personalizados
+- GitHub Actions para deploy automático
 
 ## Como Executar Localmente
 
@@ -44,11 +45,28 @@ https://seu-usuario.github.io/InfinitePlay/
 
 ```
 InfinitePlay/
-├── assets/         # Recursos do jogo (imagens, sprites)
-├── css/           # Arquivos de estilo
-├── js/            # Scripts do jogo
-└── index.html     # Página principal
+├── .github/
+│   └── workflows/    # Configurações do GitHub Actions
+├── assets/          # Recursos do jogo
+│   ├── imgs/        # Imagens gerais
+│   ├── phase0/      # Assets da fase azul
+│   ├── phase1/      # Assets da fase vermelha
+│   └── dragon/      # Sprites do dragão
+├── css/            # Arquivos de estilo
+├── js/             # Scripts do jogo
+└── index.html      # Página principal
 ```
+
+### Organização das Imagens
+
+Para garantir o funcionamento correto no GitHub Pages, as imagens devem seguir esta estrutura:
+
+- `assets/imgs/`: Imagens gerais do jogo
+- `assets/phase0/`: Imagens específicas da fase azul (nuvens, fundo, etc.)
+- `assets/phase1/`: Imagens específicas da fase vermelha (nuvens, fundo, etc.)
+- `assets/dragon/`: Sprites de animação do dragão
+
+Os caminhos das imagens no CSS e JavaScript são relativos à raiz do projeto.
 
 ## Contribuindo
 
