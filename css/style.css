@@ -155,12 +155,13 @@ button:hover {
     background-repeat: no-repeat;
     background-position: center;
     filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5));
-    opacity: 1;
+    opacity: 0;
     z-index: 10;
     pointer-events: auto;
     will-change: transform, opacity;
     transform-origin: center center;
-    transition: opacity 0.15s ease-out;
+    transition: opacity 0.3s ease-out;
+    transform: translateY(100vh);
 }
 
 /* Variações de tamanho das moedas */
@@ -520,4 +521,90 @@ body.camera-shake {
     100% {
         transform: translateX(calc(100vw + 500px));
     }
+}
+
+.phase-change-coin {
+    filter: drop-shadow(0 0 15px #ff0000) brightness(1.3);
+    z-index: 15;
+    animation: redGlow 1s infinite alternate;
+}
+
+/* Garantir que o glow não interfira com a animação de movimento */
+.phase-change-coin.coin-throw-left-fast,
+.phase-change-coin.coin-throw-right-fast,
+.phase-change-coin.coin-throw-left-very-fast,
+.phase-change-coin.coin-throw-right-very-fast {
+    animation: var(--throw-animation), redGlow 1s infinite alternate;
+}
+
+/* Definir as animações de arremesso */
+.coin-throw-left-fast {
+    --throw-animation: throwCoinLeft 1.5s forwards;
+    animation: var(--throw-animation);
+}
+
+.coin-throw-right-fast {
+    --throw-animation: throwCoinRight 1.5s forwards;
+    animation: var(--throw-animation);
+}
+
+.coin-throw-left-very-fast {
+    --throw-animation: throwCoinLeft 1s forwards;
+    animation: var(--throw-animation);
+}
+
+.coin-throw-right-very-fast {
+    --throw-animation: throwCoinRight 1s forwards;
+    animation: var(--throw-animation);
+}
+
+@keyframes redGlow {
+    from {
+        filter: drop-shadow(0 0 15px #ff0000) brightness(1.3);
+    }
+    to {
+        filter: drop-shadow(0 0 25px #ff0000) brightness(1.5);
+    }
+}
+
+/* Phase 2 Styles */
+.phase-2 #game-screen {
+    background: url('../assets/imgs/Background_phase_01.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+.phase-2 .hud {
+    background: rgba(138, 2, 2, 0.85);
+    color: #F8CAD0;
+}
+
+.phase-2 .coin:hover {
+    filter: drop-shadow(0 0 15px #ff3333) brightness(1.3);
+    z-index: 20;
+}
+
+.phase-2 .special-coin {
+    filter: drop-shadow(0 0 10px #ff6666) brightness(1.2);
+    z-index: 15;
+}
+
+.phase-2 .special-coin:hover {
+    filter: drop-shadow(0 0 20px #ff3333) brightness(1.4);
+}
+
+.phase-2 .splash-particle {
+    background: #ff6666;
+    box-shadow: 0 0 10px #ff3333;
+}
+
+.phase-2 .explosion {
+    filter: hue-rotate(320deg);
+}
+
+/* Ajuste do efeito de explosão para fase 2 */
+.phase-2 .money-effect {
+    color: #ff3333;
+    text-shadow: 
+        0 0 10px rgba(255, 51, 51, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
 } 

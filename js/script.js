@@ -13,6 +13,7 @@ const gameArea = document.getElementById('game-area');
 const GAME_DURATION = 50; // segundos
 const COIN_SPAWN_INTERVAL = 1000; // milissegundos
 const SPECIAL_COIN_CHANCE = 0.1; // 10% de chance
+const PHASE_CHANGE_COIN_CHANCE = 0.1; // 10% de chance
 const DISCO_MODE_DURATION = 10; // segundos
 const COIN_ROTATION_FRAMES = 80; // número de frames para animação da moeda
 const COIN_LIFETIME = 2500; // tempo de vida da moeda em milissegundos
@@ -53,7 +54,8 @@ let gameState = {
     spawnInterval: null,
     timerInterval: null,
     discoTimeout: null,
-    activeCoins: new Set()
+    activeCoins: new Set(),
+    currentPhase: 1
 };
 
 // Inicialização
@@ -74,7 +76,8 @@ function startGame() {
         spawnInterval: null,
         timerInterval: null,
         discoTimeout: null,
-        activeCoins: new Set()
+        activeCoins: new Set(),
+        currentPhase: 1
     };
 
     // Esconder/mostrar telas
@@ -115,24 +118,34 @@ function spawnCoin() {
     // Posição horizontal aleatória
     const maxX = gameArea.clientWidth - finalSize;
     const startX = Math.random() * maxX;
-    
     coin.style.left = `${startX}px`;
     
-    // Determinar direção aleatória do arremesso
-    const throwDirection = Math.random() < 0.5 ? 'left' : 'right';
+    // Determinar tipo de moeda primeiro
+    const isPhaseChange = Math.random() < PHASE_CHANGE_COIN_CHANCE;
+    const isSpecial = !isPhaseChange && Math.random() < SPECIAL_COIN_CHANCE;
     
-    // Calcular um ponto de início aleatório para a animação de movimento (entre 0% e 50%)
+    // Adicionar classes específicas do tipo de moeda
+    if (isPhaseChange) {
+        coin.classList.add('phase-change-coin');
+    } else if (isSpecial) {
+        coin.classList.add('special-coin');
+    }
+
+    // Configurar animação de movimento (igual para todas as moedas)
+    const throwDirection = Math.random() < 0.5 ? 'left' : 'right';
+    const throwSpeed = Math.random() < 0.5 ? 'fast' : 'very-fast';
     const randomStart = Math.random() * 50;
+    
+    // Aplicar todas as propriedades de animação de uma vez
     coin.style.animationDelay = `-${randomStart}%`;
     coin.style.animationDuration = `${COIN_ANIMATION_DURATION}ms`;
-    coin.classList.add(`coin-throw-${throwDirection}`);
+    coin.classList.add(`coin-throw-${throwDirection}-${throwSpeed}`);
     
-    // Determinar se é uma moeda especial
-    const isSpecial = Math.random() < SPECIAL_COIN_CHANCE;
-    if (isSpecial) {
-        coin.classList.add('special-coin');
-        coin.style.animation = `${coin.style.animation}, glow 1s infinite alternate`;
-    }
+    // Garantir que a moeda comece invisível e apareça suavemente
+    coin.style.opacity = '0';
+    requestAnimationFrame(() => {
+        coin.style.opacity = '1';
+    });
 
     // Adicionar evento de clique com cleanup
     const clickHandler = () => {
@@ -143,7 +156,7 @@ function spawnCoin() {
         coin.style.opacity = '0';
         
         const event = new CustomEvent('coinClick', { 
-            detail: { coin, isSpecial } 
+            detail: { coin, isSpecial, isPhaseChange } 
         });
         document.dispatchEvent(event);
         
@@ -155,7 +168,7 @@ function spawnCoin() {
             if (coin.parentNode === gameArea) {
                 gameArea.removeChild(coin);
             }
-        }, 150); // Reduced from 300ms
+        }, 150);
     };
     
     coin.addEventListener('click', clickHandler);
@@ -307,7 +320,17 @@ function createMoneyEffect(x, y) {
     money.style.left = `${x}px`;
     money.style.top = `${y}px`;
     money.style.willChange = 'transform, opacity';
-    money.textContent = '+1';
+    
+    // Determinar o texto baseado na fase atual
+    const pointValue = gameState.currentPhase === 1 ? '+1' : '+2';
+    money.textContent = pointValue;
+    
+    // Ajustar a cor baseada na fase
+    if (gameState.currentPhase === 2) {
+        money.style.color = '#ff3333';
+        money.style.textShadow = '0 0 10px rgba(255, 51, 51, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.5)';
+    }
+    
     gameArea.appendChild(money);
 
     // Use the new animation
@@ -324,50 +347,38 @@ function createMoneyEffect(x, y) {
 
 // Modificar a função collectCoin para melhorar a sequência de efeitos
 function collectCoin(event) {
-    const { coin, isSpecial } = event.detail;
-    
-    if (!gameState.isRunning || !coin.parentNode) return;
-
-    // Obter a posição da moeda para os efeitos
+    const { coin, isSpecial, isPhaseChange } = event.detail;
     const rect = coin.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
 
-    // Aplicar efeitos imediatamente
+    // Criar efeitos visuais
+    createExplosion(centerX, centerY);
+    createSplash(centerX, centerY);
     applyCameraShake();
-    createExplosion(x, y);
-    createSplash(x, y);
-    createMoneyEffect(x, y);
+    createMoneyEffect(centerX, centerY);
 
-    // Efeito de coleta
-    coin.style.transform = 'scale(1.5)';
-    coin.style.opacity = '0';
-    
-    // Remover moeda após a animação
-    setTimeout(() => {
-        if (coin.parentNode === gameArea) {
-            gameArea.removeChild(coin);
-        }
-    }, 200);
-
-    // Adicionar pontos
-    const points = gameState.isDiscoMode ? 2 : 1;
-    gameState.score += points;
-    updateScore();
-
-    // Ativar modo discoteca se for moeda especial
-    if (isSpecial && !gameState.isDiscoMode) {
+    // Atualizar pontuação
+    if (isPhaseChange) {
+        changePhase();
+        gameState.score += 10;
+    } else if (isSpecial) {
         activateDiscoMode();
+        gameState.score += 5;
+        gameState.timeRemaining += 15;
+    } else {
+        gameState.score += gameState.currentPhase === 1 ? 1 : 2;
     }
+
+    updateScore();
+    updateTimer();
 }
 
 // Ativar modo discoteca
 function activateDiscoMode() {
     gameState.isDiscoMode = true;
     document.body.classList.add('disco-mode');
-    gameState.timeRemaining += 10;
-    updateTimer();
-
+    
     // Desativar modo discoteca após duração
     if (gameState.discoTimeout) {
         clearTimeout(gameState.discoTimeout);
@@ -431,6 +442,40 @@ function cleanupGame() {
         }
     });
     gameState.activeCoins.clear();
+}
+
+// Mudar de fase
+function changePhase() {
+    gameState.currentPhase = 2;
+    document.body.classList.add('phase-2');
+    
+    // Atualizar visual do jogo
+    const gameScreen = document.getElementById('game-screen');
+    gameScreen.style.transition = 'background 1s ease-in-out';
+    
+    // Flash effect
+    const flash = document.createElement('div');
+    flash.style.position = 'fixed';
+    flash.style.top = '0';
+    flash.style.left = '0';
+    flash.style.width = '100%';
+    flash.style.height = '100%';
+    flash.style.backgroundColor = 'white';
+    flash.style.opacity = '0';
+    flash.style.transition = 'opacity 0.3s ease-in-out';
+    flash.style.zIndex = '9999';
+    document.body.appendChild(flash);
+    
+    // Flash animation
+    setTimeout(() => {
+        flash.style.opacity = '0.8';
+        setTimeout(() => {
+            flash.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(flash);
+            }, 300);
+        }, 100);
+    }, 0);
 }
 
 // Iniciar o jogo
