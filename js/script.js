@@ -19,11 +19,10 @@ const SPECIAL_COIN_CHANCE = 0.1; // 10% de chance
 const PHASE_CHANGE_COIN_CHANCE = 0.1; // 10% de chance
 const BOMB_CHANCE = 0.3; // 30% de chance de bomba
 const DISCO_MODE_DURATION = 10; // segundos
-const COIN_ROTATION_FRAMES = 80; // número de frames para animação da moeda
-const COIN_LIFETIME = 2500; // tempo de vida da moeda em milissegundos
-const COIN_ANIMATION_DURATION = 2500; // duração da animação em milissegundos
-const FRAME_DURATION = 30; // duração de cada frame em milissegundos
-const MAX_SIMULTANEOUS_SPAWNS = 3; // número máximo de instâncias simultâneas
+const COIN_ROTATION_FRAMES = 47; // número de frames para animação da moeda
+const COIN_LIFETIME = 4000; // tempo de vida da moeda em milissegundos
+const MAX_SIMULTANEOUS_SPAWNS = 2; // número máximo de instâncias simultâneas
+const FRAME_UPDATE_INTERVAL = 83; // intervalo entre atualizações de frame (83ms ≈ 12fps)
 
 // Pré-carregar imagens
 const coinImages = {
@@ -68,12 +67,12 @@ function assetLoaded() {
 async function loadCoinsForPhase(phase, type) {
     const config = {
         'phase0': {
-            'normal': { path: '../assets/novos/brlc_1_azul/', prefix: 'brlc_1_AZUL' },
-            'special': { path: '../assets/novos/brlc_2_azul/', prefix: 'brlc_2_AZUL' }
+            'normal': { path: './assets/novos/brlc_1_azul/', prefix: 'brlc_1_AZUL' },
+            'special': { path: './assets/novos/brlc_2_azul/', prefix: 'brlc_2_AZUL' }
         },
         'phase1': {
-            'normal': { path: '../assets/novos/brlc_1_laranja/', prefix: 'brlc_1_LARANJA' },
-            'special': { path: '../assets/novos/brlc_2_laranja/', prefix: 'brlc_2_LARANJA' }
+            'normal': { path: './assets/novos/brlc_1_laranja/', prefix: 'brlc_1_LARANJA' },
+            'special': { path: './assets/novos/brlc_2_laranja/', prefix: 'brlc_2_LARANJA' }
         }
     };
 
@@ -88,7 +87,6 @@ async function loadCoinsForPhase(phase, type) {
         
         const promise = new Promise((resolve, reject) => {
             img.onload = () => {
-                console.log(`✅ Moeda ${type} ${i}/${COIN_ROTATION_FRAMES} carregada: ${imagePath}`);
                 coinImages[phase][type].push(img);
                 assetLoaded(); // Marca um asset como carregado
                 resolve(img);
@@ -105,32 +103,11 @@ async function loadCoinsForPhase(phase, type) {
     }
 }
 
-// Carregar todas as moedas
-Promise.all([
-    loadCoinsForPhase('phase0', 'normal'),
-    loadCoinsForPhase('phase0', 'special'),
-    loadCoinsForPhase('phase1', 'normal'),
-    loadCoinsForPhase('phase1', 'special')
-]).then(() => {
-    console.log('✅ Todas as moedas foram carregadas!');
-}).catch(error => {
-    console.error('❌ Erro ao carregar moedas:', error);
-});
-
-// Carregar imagens das bombas
-console.log('🔄 Iniciando carregamento das bombas...');
-let bombLoadingErrors = 0;
-let bombLoadingSuccess = 0;
-
-// Inicializar arrays para cada fase
-bombImages['phase0'] = [];
-bombImages['phase1'] = [];
-
 // Função para carregar bombas de uma fase específica
 async function loadBombsForPhase(phase) {
     const phaseConfig = {
-        'phase0': { path: '../assets/novos/bomba_azul/', prefix: 'BOMB_AZUL', frames: 47 },
-        'phase1': { path: '../assets/novos/bomba_laranja/', prefix: '', frames: 47 }
+        'phase0': { path: './assets/novos/bomba_azul/', prefix: 'BOMB_AZUL', frames: 47 },
+        'phase1': { path: './assets/novos/bomba_laranja/', prefix: 'BOMB_LARANJA', frames: 47 }
     };
     
     console.log(`🔄 Carregando bombas para fase ${phase}...`);
@@ -146,14 +123,11 @@ async function loadBombsForPhase(phase) {
         
         const promise = new Promise((resolve, reject) => {
             img.onload = () => {
-                console.log(`✅ Bomba ${i}/${config.frames} carregada com sucesso: ${imagePath}`);
                 bombImages[phase].push(img);
-                bombLoadingSuccess++;
                 assetLoaded(); // Marca um asset como carregado
                 resolve(img);
             };
             img.onerror = () => {
-                bombLoadingErrors++;
                 console.error(`❌ ERRO ao carregar bomba ${i}/${config.frames}: ${imagePath}`);
                 assetLoaded(); // Mesmo com erro, conta como tentativa
                 reject(new Error(`Falha ao carregar ${imagePath}`));
@@ -167,35 +141,27 @@ async function loadBombsForPhase(phase) {
     try {
         await Promise.all(loadPromises);
         console.log(`✅ Todas as bombas da fase ${phase} foram carregadas com sucesso!`);
-        console.log(`📊 Bombas carregadas para fase ${phase}: ${bombImages[phase].length}`);
     } catch (error) {
         console.error(`❌ Erro ao carregar bombas da fase ${phase}:`, error);
     }
 }
 
-// Carregar bombas para ambas as fases
+// Carregar todas as moedas e bombas antes de iniciar o jogo
 Promise.all([
+    loadCoinsForPhase('phase0', 'normal'),
+    loadCoinsForPhase('phase0', 'special'),
+    loadCoinsForPhase('phase1', 'normal'),
+    loadCoinsForPhase('phase1', 'special'),
     loadBombsForPhase('phase0'),
     loadBombsForPhase('phase1')
 ]).then(() => {
-    console.log('✅ Carregamento de todas as bombas concluído!');
-    console.log(`📊 Estatísticas finais de carregamento:
-    - Total de bombas carregadas: ${bombLoadingSuccess}
-    - Total de erros: ${bombLoadingErrors}
-    - Bombas fase 0: ${bombImages['phase0'].length}
-    - Bombas fase 1: ${bombImages['phase1'].length}
-    `);
-    
-    // Verificar se as imagens têm src válido
-    console.log('🔍 Verificando URLs das bombas:');
-    for (const phase in bombImages) {
-        console.log(`\nFase ${phase}:`);
-        bombImages[phase].forEach((img, index) => {
-            console.log(`Bomba ${index + 1}: ${img.src}`);
-        });
-    }
+    console.log('✅ Todos os assets foram carregados!');
+    setTimeout(() => {
+        loadingScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+    }, 500);
 }).catch(error => {
-    console.error('❌ Erro no carregamento das bombas:', error);
+    console.error('❌ Erro ao carregar assets:', error);
 });
 
 // Estado do jogo
@@ -344,92 +310,24 @@ function createCoinInstance() {
     const isBomb = Math.random() < BOMB_CHANCE;
     const currentPhase = `phase${gameState.currentPhase}`;
     
-    console.log(`Sorteio de tipo: ${isBomb ? 'BOMBA' : 'MOEDA'} (chance: ${BOMB_CHANCE})`);
-    
     const isPhaseChange = !isBomb && gameState.currentPhase === 0 && Math.random() < PHASE_CHANGE_COIN_CHANCE;
     const isSpecial = !isBomb && !isPhaseChange && Math.random() < SPECIAL_COIN_CHANCE;
     
-    let frame = 0;
-    
-    if (isBomb) {
-        console.log('💣 Criando uma bomba...');
-        coin.classList.add('bomb');
-        
-        const phaseBombs = bombImages[currentPhase];
-        
-        console.log(`🔍 Debug bomba:
-        - Fase atual: ${currentPhase}
-        - Bombas disponíveis: ${phaseBombs ? phaseBombs.length : 0}
-        - Array de bombas existe: ${!!phaseBombs}
-        - gameState.currentPhase: ${gameState.currentPhase}
-        `);
-        
-        if (!phaseBombs || phaseBombs.length === 0) {
-            console.error(`❌ ERRO: Nenhuma bomba carregada para a fase ${gameState.currentPhase}!`);
-            return;
-        }
-        
-        frame = Math.floor(Math.random() * phaseBombs.length);
-        const bombImg = phaseBombs[frame];
-        
-        if (bombImg && bombImg.src) {
-            console.log(`✅ Definindo imagem da bomba: ${bombImg.src}`);
-            coin.style.backgroundImage = `url(${bombImg.src})`;
-            coin.style.backgroundSize = 'contain';
-            coin.style.backgroundRepeat = 'no-repeat';
-            coin.style.backgroundPosition = 'center';
-            coin.style.width = '124px';
-            coin.style.height = '124px';
-            coin.style.zIndex = '100';
-            
-            // Verificar se a imagem está realmente carregada
-            const testImg = new Image();
-            testImg.onload = () => console.log('✅ Imagem da bomba carregada com sucesso');
-            testImg.onerror = () => console.error('❌ Erro ao carregar imagem da bomba');
-            testImg.src = bombImg.src;
-        } else {
-            console.error('❌ ERRO: Imagem da bomba não encontrada!', {
-                phase: currentPhase,
-                frame,
-                hasBombImages: phaseBombs.length > 0,
-                numImages: phaseBombs.length,
-                frameExists: !!bombImg,
-                imgSrc: bombImg ? bombImg.src : null
-            });
-        }
-    } else {
-        const coinType = isSpecial ? 'special' : 'normal';
-        const phaseCoins = coinImages[currentPhase][coinType];
-        
-        if (!phaseCoins || phaseCoins.length === 0) {
-            console.error(`❌ ERRO: Nenhuma moeda ${coinType} carregada para a fase ${gameState.currentPhase}!`);
-            return;
-        }
-        
-        frame = Math.floor(Math.random() * phaseCoins.length);
-        const coinImg = phaseCoins[frame];
-        
-        if (coinImg && coinImg.src) {
-            coin.style.backgroundImage = `url(${coinImg.src})`;
-        }
-        
-        if (isPhaseChange) {
-            coin.classList.add('phase-change-coin');
-        } else if (isSpecial) {
-            coin.classList.add('special-coin');
-        }
-    }
-
-    // Configurar animação de movimento (igual para todas as moedas)
+    // Configurar animação de movimento
     const throwDirection = Math.random() < 0.5 ? 'left' : 'right';
     const throwSpeed = Math.random() < 0.5 ? 'fast' : 'very-fast';
-    const randomStart = Math.random() * 50;
     
-    // Aplicar todas as propriedades de animação de uma vez
-    coin.style.animationDelay = `-${randomStart}%`;
-    coin.style.animationDuration = `${COIN_ANIMATION_DURATION}ms`;
+    // Aplicar classes de animação
     coin.classList.add(`coin-throw-${throwDirection}-${throwSpeed}`);
     
+    if (isBomb) {
+        coin.classList.add('bomb');
+    } else if (isPhaseChange) {
+        coin.classList.add('phase-change-coin');
+    } else if (isSpecial) {
+        coin.classList.add('special-coin');
+    }
+
     // Garantir que a moeda comece invisível e apareça suavemente
     coin.style.opacity = '0';
     requestAnimationFrame(() => {
@@ -440,7 +338,6 @@ function createCoinInstance() {
     const clickHandler = () => {
         if (!gameState.isRunning || !coin.parentNode) return;
         
-        // Immediately start fade out
         coin.style.transition = 'opacity 0.15s ease-out';
         coin.style.opacity = '0';
         
@@ -452,7 +349,6 @@ function createCoinInstance() {
         coin.removeEventListener('click', clickHandler);
         gameState.activeCoins.delete(coin);
         
-        // Remove the coin more quickly
         setTimeout(() => {
             if (coin.parentNode === gameArea) {
                 gameArea.removeChild(coin);
@@ -463,60 +359,45 @@ function createCoinInstance() {
     coin.addEventListener('click', clickHandler);
     gameState.activeCoins.add(coin);
 
-    const rotationSpeed = 0.8 + Math.random() * 0.4;
-    const frameDuration = FRAME_DURATION * rotationSpeed;
-    
     // Manter o frame inicial separado do frame atual
-    let currentFrame = frame;
+    let currentFrame = 0;
+    let lastFrameTime = performance.now();
     
     const updateFrame = () => {
         if (!gameState.isRunning || !coin.parentNode) return;
         
-        if (isBomb) {
-            const currentPhase = `phase${gameState.currentPhase}`;
-            const phaseBombs = bombImages[currentPhase];
-            
-            if (!phaseBombs || phaseBombs.length === 0) {
-                console.error('❌ ERRO: Nenhuma bomba disponível para animação na fase', gameState.currentPhase);
-                return;
+        const currentTime = performance.now();
+        const deltaTime = currentTime - lastFrameTime;
+        
+        if (deltaTime >= FRAME_UPDATE_INTERVAL) {
+            if (isBomb) {
+                const phaseBombs = bombImages[currentPhase];
+                if (phaseBombs && phaseBombs.length > 0) {
+                    currentFrame = (currentFrame + 1) % phaseBombs.length;
+                    const bombImg = phaseBombs[currentFrame];
+                    if (bombImg && bombImg.src) {
+                        coin.style.backgroundImage = `url('${bombImg.src}')`;
+                    }
+                }
+            } else {
+                const coinType = isSpecial ? 'special' : 'normal';
+                const phaseCoins = coinImages[currentPhase][coinType];
+                if (phaseCoins && phaseCoins.length > 0) {
+                    currentFrame = (currentFrame + 1) % phaseCoins.length;
+                    const coinImg = phaseCoins[currentFrame];
+                    if (coinImg && coinImg.src) {
+                        coin.style.backgroundImage = `url('${coinImg.src}')`;
+                    }
+                }
             }
-            
-            currentFrame = (currentFrame + 1) % phaseBombs.length;
-            const bombImg = phaseBombs[currentFrame];
-            
-            if (bombImg && bombImg.src) {
-                coin.style.backgroundImage = `url(${bombImg.src})`;
-            }
-            
-            // Ajustar o intervalo para bombas (mais suave)
-            if (coin.parentNode) {
-                setTimeout(() => requestAnimationFrame(updateFrame), frameDuration * 1.5);
-            }
-        } else {
-            const coinType = isSpecial ? 'special' : 'normal';
-            const phaseCoins = coinImages[`phase${gameState.currentPhase}`][coinType];
-            
-            if (!phaseCoins || phaseCoins.length === 0) {
-                console.error(`❌ ERRO: Nenhuma moeda ${coinType} disponível para animação na fase ${gameState.currentPhase}`);
-                return;
-            }
-            
-            currentFrame = (currentFrame + 1) % phaseCoins.length;
-            const coinImg = phaseCoins[currentFrame];
-            
-            if (coinImg && coinImg.src) {
-                coin.style.backgroundImage = `url(${coinImg.src})`;
-            }
-            
-            // Atualização normal para moedas
-            if (coin.parentNode) {
-                setTimeout(() => requestAnimationFrame(updateFrame), frameDuration);
-            }
+            lastFrameTime = currentTime;
         }
+        
+        requestAnimationFrame(updateFrame);
     };
     
-    // Inicia a animação com um pequeno delay aleatório
-    setTimeout(updateFrame, Math.random() * 100);
+    // Inicia a animação
+    requestAnimationFrame(updateFrame);
     
     // Adiciona ao game area
     gameArea.appendChild(coin);
@@ -532,7 +413,7 @@ function createCoinInstance() {
                 }
             }, 300);
         }
-    }, isBomb ? 5000 : COIN_LIFETIME); // Bombas têm 5 segundos de vida, moedas continuam com 2.5 segundos
+    }, isBomb ? 6000 : COIN_LIFETIME);
 }
 
 // Funções de efeitos visuais
@@ -756,55 +637,66 @@ function changePhase() {
         gameState.dragonInterval = null;
     }
     
-    // Remover classes de fase anteriores
-    document.body.classList.remove('phase-0', 'phase-1');
-    
-    // Incrementar a fase atual (máximo fase 1)
-    gameState.currentPhase = Math.min(1, gameState.currentPhase + 1);
-    console.log('New phase:', gameState.currentPhase);
-    
-    // Adicionar a classe da nova fase
-    document.body.classList.add(`phase-${gameState.currentPhase}`);
-
-    // Recriar nuvens
-    createClouds();
-    
-    // Criar dragão se estiver na fase 1
-    if (gameState.currentPhase === 1) {
-        // Primeiro dragão após um pequeno delay
-        setTimeout(createDragon, 2000);
+    // Pré-carregar o background da próxima fase antes de fazer a transição
+    const nextPhase = gameState.currentPhase + 1;
+    const bgImage = new Image();
+    bgImage.onload = () => {
+        // Remover classes de fase anteriores
+        document.body.classList.remove('phase-0', 'phase-1');
         
-        // Configurar intervalo para novos dragões
-        gameState.dragonInterval = setInterval(() => {
-            if (gameState.isRunning && gameState.currentPhase === 1) {
-                createDragon();
-            }
-        }, 25000); // Novo dragão a cada 25 segundos
-    }
-    
-    // Flash effect
-    const flash = document.createElement('div');
-    flash.style.position = 'fixed';
-    flash.style.top = '0';
-    flash.style.left = '0';
-    flash.style.width = '100%';
-    flash.style.height = '100%';
-    flash.style.backgroundColor = 'white';
-    flash.style.opacity = '0';
-    flash.style.transition = 'opacity 0.3s ease-in-out';
-    flash.style.zIndex = '9999';
-    document.body.appendChild(flash);
-    
-    // Flash animation
-    setTimeout(() => {
-        flash.style.opacity = '0.8';
-        setTimeout(() => {
-            flash.style.opacity = '0';
+        // Incrementar a fase atual (máximo fase 1)
+        gameState.currentPhase = Math.min(1, gameState.currentPhase + 1);
+        console.log('New phase:', gameState.currentPhase);
+        
+        // Adicionar a classe da nova fase
+        document.body.classList.add(`phase-${gameState.currentPhase}`);
+
+        // Recriar nuvens
+        createClouds();
+        
+        // Criar dragão se estiver na fase 1
+        if (gameState.currentPhase === 1) {
+            // Primeiro dragão após um pequeno delay
+            setTimeout(createDragon, 2000);
+            
+            // Configurar intervalo para novos dragões
+            gameState.dragonInterval = setInterval(() => {
+                if (gameState.isRunning && gameState.currentPhase === 1) {
+                    createDragon();
+                }
+            }, 25000); // Novo dragão a cada 25 segundos
+        }
+        
+        // Flash effect com fade suave
+        const flash = document.createElement('div');
+        flash.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 9999;
+            pointer-events: none;
+        `;
+        document.body.appendChild(flash);
+        
+        // Flash animation com timing otimizado
+        requestAnimationFrame(() => {
+            flash.style.opacity = '0.8';
             setTimeout(() => {
-                document.body.removeChild(flash);
-            }, 300);
-        }, 100);
-    }, 0);
+                flash.style.opacity = '0';
+                setTimeout(() => {
+                    flash.remove();
+                }, 300);
+            }, 100);
+        });
+    };
+    
+    // Iniciar carregamento do background
+    bgImage.src = `assets/phase1/Background_phase_01.jpg`;
 }
 
 function createDragon() {
