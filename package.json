@@ -1,0 +1,25 @@
+{
+  "name": "infinite-play",
+  "version": "1.0.0",
+  "description": "Um jogo divertido de coletar moedas desenvolvido com HTML, CSS e JavaScript puro",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seu-usuario/infinitely.git"
+  },
+  "keywords": [
+    "game",
+    "javascript",
+    "html5",
+    "css3"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+} 

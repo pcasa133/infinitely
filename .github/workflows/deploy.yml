@@ -18,7 +18,7 @@ jobs:
       - name: Copy all files
         run: |
           mkdir -p dist
-          cp -r assets css js index.html dist/
+          cp -r assets css js index.html .nojekyll README.md dist/
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
