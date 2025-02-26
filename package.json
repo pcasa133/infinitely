@@ -1,0 +1,16 @@
+{
+  "name": "infinite-play",
+  "version": "1.0.0",
+  "description": "Um jogo divertido de coletar moedas desenvolvido com HTML, CSS e JavaScript puro",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "16.x"
+  },
+  "keywords": ["game", "html5", "javascript"],
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+} 
