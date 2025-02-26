@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -15,14 +17,14 @@ jobs:
           lfs: true
           fetch-depth: 0
 
-      - name: Copy all files
-        run: |
-          mkdir -p dist
-          cp -r assets css js index.html .nojekyll README.md dist/
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: '.'
 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: dist
-          clean: true 
+        id: deployment
+        uses: actions/deploy-pages@v2 
